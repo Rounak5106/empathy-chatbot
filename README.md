@@ -13,16 +13,6 @@ The chatbot aims to understand user emotions and provide context-sensitive respo
 ✨ User-friendly interface  
 
 ---
-## 📂 Project Structure
-
-empathy-chatbot/
-│
-├── app.py              # Main chatbot application
-├── requirements.txt    # Python dependencies
-├── packages.txt        # Deployment packages
-└── README.md           # Project documentation
-
----
 
 ## ⚙️ Installation
 
