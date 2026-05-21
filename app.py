@@ -16,8 +16,7 @@ st.set_page_config(
 # TITLE
 # ──────────────────────────────────────────────
 
-st.title("🧠 EmpathAI - Mental Health Support")
-st.subheader("Transformer-Based NLP Prototype")
+st.title("🧠 Transformer-Based NLP Prototype")
 
 st.caption(
     "AI-powered CBT-inspired mental health support chatbot "
@@ -26,7 +25,7 @@ st.caption(
 )
 
 # ──────────────────────────────────────────────
-# CASUAL / SMART INTENT DETECTION
+# CASUAL / SMART INTENTS
 # ──────────────────────────────────────────────
 
 CASUAL_INTENTS = {
@@ -36,12 +35,11 @@ CASUAL_INTENTS = {
             "hello", "hi", "hey",
             "good morning",
             "good evening",
-            "good afternoon",
             "yo"
         ],
         "responses": [
-            "Hey — I'm glad you reached out today. How have things been feeling lately?",
             "Hello 👋 I'm here to listen. What's been on your mind recently?",
+            "Hey — I'm glad you reached out today. How have things been feeling lately?",
             "Hi there. How are you feeling emotionally today?"
         ]
     },
@@ -49,11 +47,11 @@ CASUAL_INTENTS = {
     "how_are_you": {
         "patterns": [
             "how are you",
-            "how's it going",
-            "how are u"
+            "how are u",
+            "how's it going"
         ],
         "responses": [
-            "I'm here and ready to support you. More importantly — how have *you* been feeling lately?",
+            "I'm here and ready to support you. More importantly — how have you been feeling lately?",
             "I'm doing well and focused on helping you. What's been on your mind today?"
         ]
     },
@@ -62,8 +60,7 @@ CASUAL_INTENTS = {
         "patterns": [
             "thank you",
             "thanks",
-            "thx",
-            "appreciate it"
+            "thx"
         ],
         "responses": [
             "You're always welcome. I'm glad you shared your thoughts with me.",
@@ -79,7 +76,7 @@ CASUAL_INTENTS = {
             "take care"
         ],
         "responses": [
-            "Take care of yourself. Remember — difficult emotions are temporary, even when they feel overwhelming.",
+            "Take care of yourself. Remember — difficult emotions are temporary.",
             "I'm glad we talked today. Be gentle with yourself."
         ]
     },
@@ -91,20 +88,20 @@ CASUAL_INTENTS = {
             "give me motivation"
         ],
         "responses": [
-            "You do not need to solve your entire life today. Small consistent steps are more powerful than temporary bursts of motivation.",
-            "Progress usually looks slow while it's happening. That doesn't mean you're failing."
+            "You do not need to solve your entire life today. Small consistent steps matter.",
+            "Progress usually feels slow while it's happening. That doesn't mean you're failing."
         ]
     },
 
     "lonely": {
         "patterns": [
             "i feel lonely",
-            "nobody understands me",
-            "i feel alone"
+            "i feel alone",
+            "nobody understands me"
         ],
         "responses": [
-            "Feeling emotionally disconnected from people can be deeply painful. But being alone right now does not mean you'll always feel this way.",
-            "Loneliness often convinces us that nobody cares — even when that isn't fully true. Have you been isolating yourself lately?"
+            "Feeling emotionally disconnected from people can be deeply painful.",
+            "Loneliness can distort how we see ourselves and others."
         ]
     },
 
@@ -116,8 +113,8 @@ CASUAL_INTENTS = {
             "relationship problem"
         ],
         "responses": [
-            "Relationship pain can affect every part of daily life because emotional attachment is deeply wired into the brain.",
-            "Right now your mind may be replaying painful thoughts repeatedly. That's normal after emotional loss."
+            "Relationship pain affects emotional stability because attachment is deeply human.",
+            "Emotional loss often causes repetitive thoughts and overanalysis."
         ]
     },
 
@@ -125,18 +122,18 @@ CASUAL_INTENTS = {
         "patterns": [
             "exam stress",
             "placement pressure",
-            "career tension",
-            "study pressure"
+            "study pressure",
+            "career tension"
         ],
         "responses": [
-            "Academic pressure can make it feel like your entire future depends on one outcome — but your journey is much larger than a single exam or placement.",
-            "Stress narrows attention and increases fear-based thinking. Try focusing only on the next manageable step."
+            "Academic pressure can make it feel like your future depends on one outcome.",
+            "Stress narrows thinking and increases fear-based thoughts."
         ]
     }
 }
 
 # ──────────────────────────────────────────────
-# INTENT DETECTION FUNCTION
+# INTENT DETECTION
 # ──────────────────────────────────────────────
 
 def detect_intent(text):
@@ -153,11 +150,11 @@ def detect_intent(text):
     return None
 
 # ──────────────────────────────────────────────
-# LOAD TRANSFORMER MODEL
+# LOAD MODEL
 # ──────────────────────────────────────────────
 
 @st.cache_resource
-def load_emotion_model():
+def load_model():
 
     return pipeline(
         "text-classification",
@@ -165,7 +162,7 @@ def load_emotion_model():
         top_k=None
     )
 
-classifier = load_emotion_model()
+classifier = load_model()
 
 # ──────────────────────────────────────────────
 # EMOTION DETECTION
@@ -182,75 +179,86 @@ def detect_emotion(user_input):
 
     text = user_input.lower()
 
-    # ── semantic correction layer ──
+    # ──────────────────────────────────────────
+    # SEMANTIC NLP CORRECTION LAYER
+    # ──────────────────────────────────────────
 
-    sad_patterns = [
-        "not feeling well",
-        "nothing feels meaningful",
-        "emotionally numb",
-        "empty inside",
-        "nothing matters",
-        "feel drained",
-        "lost interest",
-        "i feel empty",
-        "i feel hopeless",
-        "feeling terrible",
-        "feeling awful",
-        "feeling bad",
-        "mentally exhausted",
-        "emotionally tired"
+    sad_words = [
+        "sad", "hopeless", "empty", "lonely",
+        "worthless", "tired", "drained",
+        "crying", "depressed", "broken",
+        "hurt", "numb", "exhausted",
+        "meaningless", "upset", "disconnected"
     ]
 
-    fear_patterns = [
-        "worst-case",
-        "overthinking",
-        "thoughts racing",
-        "can't stop thinking",
-        "future scares me",
-        "keep imagining",
-        "mind won't stop",
-        "my thoughts won't stop"
+    fear_words = [
+        "anxious", "anxiety", "fear",
+        "worried", "panic", "overthinking",
+        "scared", "future", "stress",
+        "pressure", "nervous",
+        "racing thoughts", "placement",
+        "exam"
     ]
 
-    anger_patterns = [
-        "everyone irritates me",
-        "frustrated",
-        "annoyed",
-        "angry lately",
-        "people keep irritating me"
+    anger_words = [
+        "angry", "frustrated",
+        "annoyed", "irritated",
+        "mad", "hate", "furious"
     ]
 
-    joy_patterns = [
-        "feeling better",
-        "feeling happy",
-        "peaceful day",
-        "feeling good today",
-        "i feel okay now"
+    joy_words = [
+        "happy", "peaceful",
+        "excited", "good",
+        "better", "great",
+        "fine", "relaxed",
+        "motivated", "proud"
     ]
 
-    # ── semantic overrides ──
+    negative_context = [
+        "not", "never", "don't",
+        "cant", "can't", "hardly"
+    ]
 
-    if any(p in text for p in sad_patterns):
+    # ── sadness detection ──
+
+    if (
+        any(word in text for word in sad_words)
+        or (
+            any(n in text for n in negative_context)
+            and any(j in text for j in joy_words)
+        )
+    ):
+
         emotion = "sadness"
         confidence = 95
-        method = "semantic override"
+        method = "semantic NLP override"
 
-    elif any(p in text for p in fear_patterns):
+    # ── fear detection ──
+
+    elif any(word in text for word in fear_words):
+
         emotion = "fear"
         confidence = 92
-        method = "semantic override"
+        method = "semantic NLP override"
 
-    elif any(p in text for p in anger_patterns):
+    # ── anger detection ──
+
+    elif any(word in text for word in anger_words):
+
         emotion = "anger"
         confidence = 89
-        method = "semantic override"
+        method = "semantic NLP override"
 
-    elif any(p in text for p in joy_patterns):
+    # ── joy detection ──
+
+    elif any(word in text for word in joy_words):
+
         emotion = "joy"
         confidence = 90
-        method = "semantic override"
+        method = "semantic NLP override"
 
     else:
+
         method = "transformer"
 
     return emotion, confidence, method
@@ -295,7 +303,7 @@ with st.sidebar:
     )
 
 # ──────────────────────────────────────────────
-# DISPLAY OLD CHAT
+# DISPLAY CHAT HISTORY
 # ──────────────────────────────────────────────
 
 for message in st.session_state.messages:
@@ -380,37 +388,36 @@ if user_input:
     if crisis_detected:
 
         bot_reply = (
-            "I'm really sorry you're feeling this overwhelmed right now. "
-            "You deserve support from real people who can help immediately.\n\n"
-            "Please consider reaching out to a trusted person, mental health "
-            "professional, or local crisis helpline."
+            "I'm really sorry you're feeling this overwhelmed right now.\n\n"
+            "You deserve immediate support from trusted people or professionals. "
+            "Please consider reaching out to a mental health professional, "
+            "trusted friend, or crisis helpline."
         )
 
     elif emotion == "sadness":
 
         bot_reply = (
-            "It sounds like emotional exhaustion and hopeless thoughts "
+            "It sounds like emotional exhaustion and painful thoughts "
             "have been weighing heavily on you.\n\n"
-            "Sometimes the brain starts treating painful emotions as permanent truths — "
-            "even though emotions naturally change over time.\n\n"
-            "Focusing on one small meaningful step today may help create emotional momentum again."
+            "Sometimes emotions convince us that pain will last forever, "
+            "even though emotional states naturally change over time.\n\n"
+            "Taking one small meaningful step today may slowly help rebuild emotional balance."
         )
 
     elif emotion == "fear":
 
         bot_reply = (
-            "Your mind seems highly focused on uncertainty and possible future outcomes right now.\n\n"
+            "Your mind seems focused on uncertainty and future possibilities right now.\n\n"
             "Anxiety often pushes the brain into worst-case prediction mode. "
-            "Grounding yourself in the present moment instead of imagined futures "
-            "can slowly reduce mental overload."
+            "Grounding yourself in the present moment can reduce mental overload."
         )
 
     elif emotion == "anger":
 
         bot_reply = (
-            "It seems like frustration and emotional pressure have been building internally for some time.\n\n"
+            "It seems like emotional pressure and frustration have been building internally.\n\n"
             "Strong emotions can speed up thoughts and reactions. "
-            "Pausing briefly before reacting may help you regain clarity and emotional control."
+            "Pausing before reacting may help you regain clarity and emotional control."
         )
 
     elif emotion == "joy":
@@ -418,7 +425,7 @@ if user_input:
         bot_reply = (
             "I'm glad something positive is happening emotionally for you right now.\n\n"
             "The brain naturally focuses more on negative experiences, "
-            "so intentionally noticing positive moments can strengthen emotional resilience over time."
+            "so intentionally noticing positive moments strengthens emotional resilience."
         )
 
     else:
@@ -426,7 +433,7 @@ if user_input:
         bot_reply = (
             "Thank you for sharing your thoughts openly.\n\n"
             "Talking about emotions instead of suppressing them "
-            "can sometimes reduce emotional pressure and increase self-awareness."
+            "can reduce emotional pressure and improve self-awareness."
         )
 
     # ── Store Assistant Message ──────────────
