@@ -161,7 +161,9 @@ def detect_emotion(user_input):
         "worthless", "lonely",
         "crying", "depressed",
         "broken", "hurt",
-        "meaningless", "tired"
+        "meaningless", "tired",
+        "bad", "not okay",
+        "not fine", "upset"
     ]
 
     fear_words = [
@@ -169,7 +171,7 @@ def detect_emotion(user_input):
         "panic", "future",
         "worried", "overthinking",
         "pressure", "exam",
-        "placement"
+        "placement", "fear"
     ]
 
     anger_words = [
@@ -179,15 +181,41 @@ def detect_emotion(user_input):
     ]
 
     joy_words = [
-        "happy", "peaceful",
-        "good", "great",
-        "better", "motivated",
-        "proud", "relaxed"
+        "happy",
+        "peaceful",
+        "great",
+        "better",
+        "motivated",
+        "proud",
+        "relaxed",
+        "excited"
     ]
+
+    negative_phrases = [
+        "not feeling good",
+        "not good",
+        "dont feel good",
+        "don't feel good",
+        "not feeling well",
+        "feeling bad",
+        "feeling terrible",
+        "i am not okay",
+        "i feel horrible"
+    ]
+
+    # ──────────────────────────
+    # NEGATION HANDLING
+    # ──────────────────────────
+
+    if any(phrase in text for phrase in negative_phrases):
+
+        emotion = "sadness"
+        confidence = 94
+        method = "semantic NLP override"
 
     # sadness
 
-    if any(word in text for word in sad_words):
+    elif any(word in text for word in sad_words):
 
         emotion = "sadness"
         confidence = 95
