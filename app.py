@@ -13,15 +13,41 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────
+# CUSTOM CSS
+# ──────────────────────────────────────────────
+
+st.markdown("""
+<style>
+
+.main {
+    background-color: #020617;
+}
+
+.stChatMessage {
+    border-radius: 14px;
+    padding: 10px;
+}
+
+.block-container {
+    padding-top: 2rem;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────
 # TITLE
 # ──────────────────────────────────────────────
 
-st.title("🧠 Transformer-Based NLP Prototype")
+st.title("🧠 EmpathAI")
 
 st.caption(
-    "AI-powered CBT-inspired mental health support chatbot "
-    "using Transformer NLP, semantic emotion detection, "
-    "and contextual empathetic reframing."
+    "Transformer-based NLP Prototype for Mental Health Support, "
+    "CBT Reframing, Semantic Emotion Detection, and Crisis Safety Monitoring."
+)
+
+st.warning(
+    "⚠️ Academic NLP Prototype — Not a replacement for professional mental health care."
 )
 
 # ──────────────────────────────────────────────
@@ -34,25 +60,12 @@ CASUAL_INTENTS = {
         "patterns": [
             "hello", "hi", "hey",
             "good morning",
-            "good evening",
-            "yo"
+            "good evening"
         ],
         "responses": [
             "Hello 👋 I'm here to listen. What's been on your mind recently?",
             "Hey — I'm glad you reached out today. How have things been feeling lately?",
             "Hi there. How are you feeling emotionally today?"
-        ]
-    },
-
-    "how_are_you": {
-        "patterns": [
-            "how are you",
-            "how are u",
-            "how's it going"
-        ],
-        "responses": [
-            "I'm here and ready to support you. More importantly — how have you been feeling lately?",
-            "I'm doing well and focused on helping you. What's been on your mind today?"
         ]
     },
 
@@ -63,8 +76,8 @@ CASUAL_INTENTS = {
             "thx"
         ],
         "responses": [
-            "You're always welcome. I'm glad you shared your thoughts with me.",
-            "No need to thank me — reaching out and talking openly already takes courage."
+            "You're welcome. Talking openly already takes courage.",
+            "I'm glad you shared your thoughts with me."
         ]
     },
 
@@ -72,11 +85,10 @@ CASUAL_INTENTS = {
         "patterns": [
             "bye",
             "goodbye",
-            "see you",
             "take care"
         ],
         "responses": [
-            "Take care of yourself. Remember — difficult emotions are temporary.",
+            "Take care of yourself. Difficult emotions are temporary.",
             "I'm glad we talked today. Be gentle with yourself."
         ]
     },
@@ -84,50 +96,11 @@ CASUAL_INTENTS = {
     "motivation": {
         "patterns": [
             "motivate me",
-            "i need motivation",
-            "give me motivation"
+            "i need motivation"
         ],
         "responses": [
             "You do not need to solve your entire life today. Small consistent steps matter.",
-            "Progress usually feels slow while it's happening. That doesn't mean you're failing."
-        ]
-    },
-
-    "lonely": {
-        "patterns": [
-            "i feel lonely",
-            "i feel alone",
-            "nobody understands me"
-        ],
-        "responses": [
-            "Feeling emotionally disconnected from people can be deeply painful.",
-            "Loneliness can distort how we see ourselves and others."
-        ]
-    },
-
-    "relationship": {
-        "patterns": [
-            "breakup",
-            "she left me",
-            "he left me",
-            "relationship problem"
-        ],
-        "responses": [
-            "Relationship pain affects emotional stability because attachment is deeply human.",
-            "Emotional loss often causes repetitive thoughts and overanalysis."
-        ]
-    },
-
-    "study_stress": {
-        "patterns": [
-            "exam stress",
-            "placement pressure",
-            "study pressure",
-            "career tension"
-        ],
-        "responses": [
-            "Academic pressure can make it feel like your future depends on one outcome.",
-            "Stress narrows thinking and increases fear-based thoughts."
+            "Progress feels slow while it's happening. That doesn't mean you're failing."
         ]
     }
 }
@@ -150,7 +123,7 @@ def detect_intent(text):
     return None
 
 # ──────────────────────────────────────────────
-# LOAD MODEL
+# LOAD TRANSFORMER MODEL
 # ──────────────────────────────────────────────
 
 @st.cache_resource
@@ -179,61 +152,48 @@ def detect_emotion(user_input):
 
     text = user_input.lower()
 
-    # ──────────────────────────────────────────
-    # SEMANTIC NLP CORRECTION LAYER
-    # ──────────────────────────────────────────
+    # ──────────────────────────
+    # SEMANTIC NLP OVERRIDE
+    # ──────────────────────────
 
     sad_words = [
-        "sad", "hopeless", "empty", "lonely",
-        "worthless", "tired", "drained",
-        "crying", "depressed", "broken",
-        "hurt", "numb", "exhausted",
-        "meaningless", "upset", "disconnected"
+        "sad", "hopeless", "empty",
+        "worthless", "lonely",
+        "crying", "depressed",
+        "broken", "hurt",
+        "meaningless", "tired"
     ]
 
     fear_words = [
-        "anxious", "anxiety", "fear",
-        "worried", "panic", "overthinking",
-        "scared", "future", "stress",
-        "pressure", "nervous",
-        "racing thoughts", "placement",
-        "exam"
+        "anxious", "stress",
+        "panic", "future",
+        "worried", "overthinking",
+        "pressure", "exam",
+        "placement"
     ]
 
     anger_words = [
         "angry", "frustrated",
-        "annoyed", "irritated",
-        "mad", "hate", "furious"
+        "hate", "annoyed",
+        "irritated"
     ]
 
     joy_words = [
         "happy", "peaceful",
-        "excited", "good",
-        "better", "great",
-        "fine", "relaxed",
-        "motivated", "proud"
+        "good", "great",
+        "better", "motivated",
+        "proud", "relaxed"
     ]
 
-    negative_context = [
-        "not", "never", "don't",
-        "cant", "can't", "hardly"
-    ]
+    # sadness
 
-    # ── sadness detection ──
-
-    if (
-        any(word in text for word in sad_words)
-        or (
-            any(n in text for n in negative_context)
-            and any(j in text for j in joy_words)
-        )
-    ):
+    if any(word in text for word in sad_words):
 
         emotion = "sadness"
         confidence = 95
         method = "semantic NLP override"
 
-    # ── fear detection ──
+    # fear
 
     elif any(word in text for word in fear_words):
 
@@ -241,7 +201,7 @@ def detect_emotion(user_input):
         confidence = 92
         method = "semantic NLP override"
 
-    # ── anger detection ──
+    # anger
 
     elif any(word in text for word in anger_words):
 
@@ -249,7 +209,7 @@ def detect_emotion(user_input):
         confidence = 89
         method = "semantic NLP override"
 
-    # ── joy detection ──
+    # joy
 
     elif any(word in text for word in joy_words):
 
@@ -279,7 +239,7 @@ with st.sidebar:
     st.header("⚙️ Features")
 
     st.write("✅ Transformer-based Emotion Detection")
-    st.write("✅ Semantic Emotion Correction")
+    st.write("✅ Semantic NLP Correction")
     st.write("✅ CBT-inspired Responses")
     st.write("✅ Intent Detection Layer")
     st.write("✅ Multi-turn Chat")
@@ -287,19 +247,19 @@ with st.sidebar:
 
     st.write("🚧 RAG Integration")
     st.write("🚧 Long-Term Memory")
-    st.write("🚧 Personalized Therapy Support")
+    st.write("🚧 Personalized Support")
 
     st.divider()
 
     if st.button("🗑️ Clear Conversation"):
+
         st.session_state.messages = []
         st.rerun()
 
     st.divider()
 
-    st.warning(
-        "⚠️ This is an academic NLP prototype and "
-        "not a replacement for professional mental health care."
+    st.info(
+        "Prototype for NLP-based Mental Health Support System"
     )
 
 # ──────────────────────────────────────────────
@@ -315,9 +275,9 @@ for message in st.session_state.messages:
         if "emotion" in message:
 
             st.caption(
-                f"{message['emotion']} • "
-                f"{message['confidence']}% confidence "
-                f"• [{message['method']}]"
+                f"Emotion: {message['emotion']} • "
+                f"{message['confidence']}% confidence • "
+                f"[{message['method']}]"
             )
 
             st.progress(message["confidence"] / 100)
@@ -330,7 +290,9 @@ user_input = st.chat_input("How are you feeling today?")
 
 if user_input:
 
-    # ── Intent Detection ─────────────────────
+    # ──────────────────────────
+    # INTENT DETECTION
+    # ──────────────────────────
 
     intent = detect_intent(user_input)
 
@@ -352,13 +314,17 @@ if user_input:
 
         st.rerun()
 
-    # ── Emotion Detection ────────────────────
+    # ──────────────────────────
+    # EMOTION DETECTION
+    # ──────────────────────────
 
     emotion, confidence, method = detect_emotion(user_input)
 
     text = user_input.lower()
 
-    # ── Crisis Detection ─────────────────────
+    # ──────────────────────────
+    # CRISIS DETECTION
+    # ──────────────────────────
 
     crisis_keywords = [
         "suicide",
@@ -366,14 +332,18 @@ if user_input:
         "end my life",
         "don't want to live",
         "want to disappear",
-        "self harm"
+        "self harm",
+        "hurt myself",
+        "i want to die"
     ]
 
     crisis_detected = any(
         word in text for word in crisis_keywords
     )
 
-    # ── Store User Message ───────────────────
+    # ──────────────────────────
+    # STORE USER MESSAGE
+    # ──────────────────────────
 
     st.session_state.messages.append({
         "role": "user",
@@ -383,15 +353,19 @@ if user_input:
         "method": method
     })
 
-    # ── Generate Response ────────────────────
+    # ──────────────────────────
+    # GENERATE RESPONSE
+    # ──────────────────────────
 
     if crisis_detected:
 
         bot_reply = (
             "I'm really sorry you're feeling this overwhelmed right now.\n\n"
-            "You deserve immediate support from trusted people or professionals. "
-            "Please consider reaching out to a mental health professional, "
-            "trusted friend, or crisis helpline."
+            "🇮🇳 India Mental Health Helplines:\n"
+            "📞 Tele-MANAS: 14416 or 1-800-891-4416\n"
+            "📞 AASRA Suicide Prevention: +91 9820466726\n\n"
+            "Please reach out to a trusted person or mental health professional immediately.\n\n"
+            "You are not alone."
         )
 
     elif emotion == "sadness":
@@ -436,7 +410,9 @@ if user_input:
             "can reduce emotional pressure and improve self-awareness."
         )
 
-    # ── Store Assistant Message ──────────────
+    # ──────────────────────────
+    # STORE ASSISTANT MESSAGE
+    # ──────────────────────────
 
     st.session_state.messages.append({
         "role": "assistant",
