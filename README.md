@@ -2,7 +2,7 @@
 
 > An NLP-powered mental health support chatbot that detects your emotional state using a fine-tuned Transformer model and responds with **your own words** woven into CBT-informed replies — moving beyond generic template chatbots.
 
-🌐 **[Live Demo](https://empathy-chatbot-t5q6wgik4v9zypfybutpci.streamlit.app)** &nbsp;|&nbsp; 📄 **Prototype v3.1** &nbsp;|&nbsp; 🐍 Python 3.11+
+🌐 **[Live Demo](https://empathy-chatbot-t5q6wgik4v9zypfybutpci.streamlit.app)** &nbsp;|&nbsp; 📄 **Prototype v1** &nbsp;|&nbsp; 🐍 Python 3.11+
 
 ---
 
