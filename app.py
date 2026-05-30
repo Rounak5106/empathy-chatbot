@@ -1,6 +1,10 @@
 import streamlit as st
 from transformers import pipeline
 import random
+import csv
+import os
+import uuid
+from datetime import datetime
 
 # ──────────────────────────────────────────────
 # PAGE CONFIG
@@ -37,20 +41,57 @@ st.caption(
     "Transformer-based NLP Prototype for Mental Health Support, "
     "CBT Reframing, Semantic Emotion Detection, and Crisis Safety Monitoring."
 )
+
+# ── RESEARCH DISCLAIMER ──
+st.info(
+    "🔬 This AI model is developed solely for **academic and research purposes** "
+    "and is **NOT intended for clinical application** or as a substitute for "
+    "professional mental health care."
+)
 st.warning(
     "⚠️ Academic NLP Prototype — Not a replacement for professional mental health care."
 )
+
+# ──────────────────────────────────────────────
+# DIALOGUE CHAIN SAVE FUNCTION
+# ──────────────────────────────────────────────
+def save_dialogue(session_id, role, content, emotion="", confidence="", method=""):
+    filename = "dialogue_log.csv"
+    file_exists = os.path.exists(filename)
+    with open(filename, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["session_id", "timestamp", "role", "message", "emotion", "confidence", "method"])
+        writer.writerow([
+            session_id,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            role,
+            content,
+            emotion,
+            confidence,
+            method
+        ])
+
+def save_feedback(session_id, rating, feedback_text):
+    filename = "feedback_log.csv"
+    file_exists = os.path.exists(filename)
+    with open(filename, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["session_id", "timestamp", "rating", "feedback"])
+        writer.writerow([
+            session_id,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            rating,
+            feedback_text
+        ])
 
 # ──────────────────────────────────────────────
 # CASUAL / SMART INTENTS
 # ──────────────────────────────────────────────
 CASUAL_INTENTS = {
     "greeting": {
-        "patterns": [
-            "hello", "hi", "hey",
-            "good morning",
-            "good evening"
-        ],
+        "patterns": ["hello", "hi", "hey", "good morning", "good evening"],
         "responses": [
             "Hello 👋 I'm here to listen. What's been on your mind recently?",
             "Hey — I'm glad you reached out today. How have things been feeling lately?",
@@ -58,32 +99,21 @@ CASUAL_INTENTS = {
         ]
     },
     "thanks": {
-        "patterns": [
-            "thank you",
-            "thanks",
-            "thx"
-        ],
+        "patterns": ["thank you", "thanks", "thx"],
         "responses": [
             "You're welcome. Talking openly already takes courage.",
             "I'm glad you shared your thoughts with me."
         ]
     },
     "bye": {
-        "patterns": [
-            "bye",
-            "goodbye",
-            "take care"
-        ],
+        "patterns": ["bye", "goodbye", "take care"],
         "responses": [
             "Take care of yourself. Difficult emotions are temporary.",
             "I'm glad we talked today. Be gentle with yourself."
         ]
     },
     "motivation": {
-        "patterns": [
-            "motivate me",
-            "i need motivation"
-        ],
+        "patterns": ["motivate me", "i need motivation"],
         "responses": [
             "You do not need to solve your entire life today. Small consistent steps matter.",
             "Progress feels slow while it's happening. That doesn't mean you're failing."
@@ -174,65 +204,22 @@ def detect_emotion(user_input):
 
     text = user_input.lower()
 
-    sad_words = [
-        "sad", "hopeless", "empty",
-        "worthless", "lonely",
-        "crying", "depressed",
-        "broken", "hurt",
-        "meaningless", "tired",
-        "bad", "not okay",
-        "not fine", "upset"
-    ]
-    fear_words = [
-        "anxious", "stress",
-        "panic", "future",
-        "worried", "overthinking",
-        "pressure", "exam",
-        "placement", "fear"
-    ]
-    anger_words = [
-        "angry", "frustrated",
-        "hate", "annoyed",
-        "irritated"
-    ]
-    joy_words = [
-        "happy", "peaceful",
-        "great", "better",
-        "motivated", "proud",
-        "relaxed", "excited"
-    ]
-    negative_phrases = [
-        "not feeling good",
-        "not good",
-        "dont feel good",
-        "don't feel good",
-        "not feeling well",
-        "feeling bad",
-        "feeling terrible",
-        "i am not okay",
-        "i feel horrible"
-    ]
+    sad_words = ["sad", "hopeless", "empty", "worthless", "lonely", "crying", "depressed", "broken", "hurt", "meaningless", "tired", "bad", "not okay", "not fine", "upset"]
+    fear_words = ["anxious", "stress", "panic", "future", "worried", "overthinking", "pressure", "exam", "placement", "fear"]
+    anger_words = ["angry", "frustrated", "hate", "annoyed", "irritated"]
+    joy_words = ["happy", "peaceful", "great", "better", "motivated", "proud", "relaxed", "excited"]
+    negative_phrases = ["not feeling good", "not good", "dont feel good", "don't feel good", "not feeling well", "feeling bad", "feeling terrible", "i am not okay", "i feel horrible"]
 
     if any(phrase in text for phrase in negative_phrases):
-        emotion = "sadness"
-        confidence = 94
-        method = "semantic NLP override"
+        emotion = "sadness"; confidence = 94; method = "semantic NLP override"
     elif any(word in text for word in sad_words):
-        emotion = "sadness"
-        confidence = 95
-        method = "semantic NLP override"
+        emotion = "sadness"; confidence = 95; method = "semantic NLP override"
     elif any(word in text for word in fear_words):
-        emotion = "fear"
-        confidence = 92
-        method = "semantic NLP override"
+        emotion = "fear"; confidence = 92; method = "semantic NLP override"
     elif any(word in text for word in anger_words):
-        emotion = "anger"
-        confidence = 89
-        method = "semantic NLP override"
+        emotion = "anger"; confidence = 89; method = "semantic NLP override"
     elif any(word in text for word in joy_words):
-        emotion = "joy"
-        confidence = 90
-        method = "semantic NLP override"
+        emotion = "joy"; confidence = 90; method = "semantic NLP override"
     else:
         method = "transformer"
 
@@ -244,17 +231,25 @@ def detect_emotion(user_input):
 if "messages" not in st.session_state:
     st.session_state.messages = []
     st.session_state.turn_count = 0
+    st.session_state.feedback_submitted = False
+    # ── GENERATE UNIQUE SESSION ID ──
+    st.session_state.session_id = str(uuid.uuid4())[:8]
     # ── PROACTIVE OPENING MESSAGE ──
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": (
-            "Hey 👋 I'm EmpathAI — I'm here to listen, no judgment, no rush.\n\n"
-            "How has your day been feeling so far? You can share as little or as much as you'd like."
-        )
-    })
+    opening = (
+        "Hey 👋 I'm EmpathAI — I'm here to listen, no judgment, no rush.\n\n"
+        "How has your day been feeling so far? You can share as little or as much as you'd like."
+    )
+    st.session_state.messages.append({"role": "assistant", "content": opening})
+    save_dialogue(st.session_state.session_id, "assistant", opening)
 
 if "turn_count" not in st.session_state:
     st.session_state.turn_count = 0
+
+if "feedback_submitted" not in st.session_state:
+    st.session_state.feedback_submitted = False
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:8]
 
 # ──────────────────────────────────────────────
 # SIDEBAR
@@ -270,20 +265,25 @@ with st.sidebar:
     st.write("✅ Proactive Opening Message")
     st.write("✅ Follow-up Questions")
     st.write("✅ Periodic Check-ins")
+    st.write("✅ Dialogue Chain Logging")
+    st.write("✅ User Feedback Collection")
     st.write("🚧 RAG Integration")
     st.write("🚧 Long-Term Memory")
     st.write("🚧 Personalized Support")
     st.divider()
+    st.caption(f"Session ID: `{st.session_state.session_id}`")
+    st.divider()
     if st.button("🗑️ Clear Conversation"):
         st.session_state.messages = []
         st.session_state.turn_count = 0
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": (
-                "Hey 👋 I'm EmpathAI — I'm here to listen, no judgment, no rush.\n\n"
-                "How has your day been feeling so far? You can share as little or as much as you'd like."
-            )
-        })
+        st.session_state.feedback_submitted = False
+        st.session_state.session_id = str(uuid.uuid4())[:8]
+        opening = (
+            "Hey 👋 I'm EmpathAI — I'm here to listen, no judgment, no rush.\n\n"
+            "How has your day been feeling so far? You can share as little or as much as you'd like."
+        )
+        st.session_state.messages.append({"role": "assistant", "content": opening})
+        save_dialogue(st.session_state.session_id, "assistant", opening)
         st.rerun()
     st.divider()
     st.info("Prototype for NLP-based Mental Health Support System")
@@ -315,6 +315,8 @@ if user_input:
         reply = random.choice(CASUAL_INTENTS[intent]["responses"])
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.session_state.messages.append({"role": "assistant", "content": reply})
+        save_dialogue(st.session_state.session_id, "user", user_input)
+        save_dialogue(st.session_state.session_id, "assistant", reply)
         st.rerun()
 
     # ── EMOTION DETECTION ──
@@ -323,14 +325,9 @@ if user_input:
 
     # ── CRISIS DETECTION ──
     crisis_keywords = [
-        "suicide",
-        "kill myself",
-        "end my life",
-        "don't want to live",
-        "want to disappear",
-        "self harm",
-        "hurt myself",
-        "i want to die"
+        "suicide", "kill myself", "end my life", "don't want to live",
+        "want to disappear", "self harm", "hurt myself", "i want to die",
+        "no reason to live", "can't go on"
     ]
     crisis_detected = any(word in text for word in crisis_keywords)
 
@@ -342,6 +339,7 @@ if user_input:
         "confidence": confidence,
         "method": method
     })
+    save_dialogue(st.session_state.session_id, "user", user_input, emotion, confidence, method)
 
     # ── INCREMENT TURN COUNT ──
     st.session_state.turn_count += 1
@@ -350,13 +348,14 @@ if user_input:
     if crisis_detected:
         bot_reply = (
             "I'm really sorry you're feeling this overwhelmed right now.\n\n"
-            "🇮🇳 India Mental Health Helplines:\n"
+            "🇮🇳 **India Mental Health Helplines:**\n"
             "📞 Tele-MANAS: 14416 or 1-800-891-4416\n"
-            "📞 AASRA Suicide Prevention: +91 9820466726\n\n"
+            "📞 AASRA Suicide Prevention: +91 9820466627\n"
+            "📞 Vandrevala Foundation: 1860-2662-345\n"
+            "📞 iCall: 9152987821\n\n"
             "Please reach out to a trusted person or mental health professional immediately.\n\n"
-            "You are not alone."
+            "You are not alone. 💙"
         )
-
     elif emotion == "sadness":
         bot_reply = (
             "It sounds like emotional exhaustion and painful thoughts "
@@ -365,28 +364,24 @@ if user_input:
             "even though emotional states naturally change over time.\n\n"
             "Taking one small meaningful step today may slowly help rebuild emotional balance."
         )
-
     elif emotion == "fear":
         bot_reply = (
             "Your mind seems focused on uncertainty and future possibilities right now.\n\n"
             "Anxiety often pushes the brain into worst-case prediction mode. "
             "Grounding yourself in the present moment can reduce mental overload."
         )
-
     elif emotion == "anger":
         bot_reply = (
             "It seems like emotional pressure and frustration have been building internally.\n\n"
             "Strong emotions can speed up thoughts and reactions. "
             "Pausing before reacting may help you regain clarity and emotional control."
         )
-
     elif emotion == "joy":
         bot_reply = (
             "I'm glad something positive is happening emotionally for you right now.\n\n"
             "The brain naturally focuses more on negative experiences, "
             "so intentionally noticing positive moments strengthens emotional resilience."
         )
-
     else:
         bot_reply = (
             "Thank you for sharing your thoughts openly.\n\n"
@@ -404,9 +399,26 @@ if user_input:
         bot_reply += random.choice(CHECKIN_PROMPTS)
 
     # ── STORE ASSISTANT MESSAGE ──
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": bot_reply
-    })
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+    save_dialogue(st.session_state.session_id, "assistant", bot_reply)
 
     st.rerun()
+
+# ──────────────────────────────────────────────
+# FEEDBACK FORM (shown after 3+ turns)
+# ──────────────────────────────────────────────
+if st.session_state.turn_count >= 3 and not st.session_state.feedback_submitted:
+    st.divider()
+    st.subheader("💬 Session Feedback")
+    st.caption("Your feedback helps us improve this research prototype.")
+    rating = st.slider("How helpful was this session?", 1, 5, 3, key="rating_slider")
+    feedback_text = st.text_area("Any comments? (optional)", key="feedback_text")
+    if st.button("Submit Feedback"):
+        save_feedback(st.session_state.session_id, rating, feedback_text)
+        st.session_state.feedback_submitted = True
+        st.success("Thank you for your feedback! 🙏 It helps improve the research.")
+        st.rerun()
+
+if st.session_state.feedback_submitted:
+    st.divider()
+    st.success("✅ Feedback submitted for this session. Thank you!")
