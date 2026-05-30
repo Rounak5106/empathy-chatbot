@@ -1,0 +1,24 @@
+session_id,timestamp,role,message,emotion,confidence,method
+2e7aa956,2026-05-30 20:19:38,assistant,"Hey 👋 I'm EmpathAI — I'm here to listen, no judgment, no rush.
+
+How has your day been feeling so far? You can share as little or as much as you'd like.",,,
+2e7aa956,2026-05-30 20:20:22,user,I feel sad,sadness,95,semantic NLP override
+2e7aa956,2026-05-30 20:20:22,assistant,"It sounds like emotional exhaustion and painful thoughts have been weighing heavily on you.
+
+Sometimes emotions convince us that pain will last forever, even though emotional states naturally change over time.
+
+Taking one small meaningful step today may slowly help rebuild emotional balance.
+
+Is there something specific that's been weighing on you?",,,
+2e7aa956,2026-05-30 20:20:29,user,I feel anxious,fear,92,semantic NLP override
+2e7aa956,2026-05-30 20:20:29,assistant,"Your mind seems focused on uncertainty and future possibilities right now.
+
+Anxiety often pushes the brain into worst-case prediction mode. Grounding yourself in the present moment can reduce mental overload.
+
+How long have you been carrying this worry?",,,
+2e7aa956,2026-05-30 20:20:40,user,I feel energetic,joy,99,transformer
+2e7aa956,2026-05-30 20:20:40,assistant,"I'm glad something positive is happening emotionally for you right now.
+
+The brain naturally focuses more on negative experiences, so intentionally noticing positive moments strengthens emotional resilience.
+
+What's been making you feel this way? I'd love to hear more.",,,
